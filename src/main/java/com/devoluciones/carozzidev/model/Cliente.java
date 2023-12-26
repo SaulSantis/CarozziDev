@@ -1,10 +1,7 @@
 package com.devoluciones.carozzidev.model;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -17,6 +14,12 @@ public class Cliente {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int idCliente;
+    @Column(name = "id_cliente")
+    private Long idCliente;
+
+    @Column(name = "nombre_cliente")
     private String nombreCliente;
+
+    @Column(name = "rut_cliente")
+    private String rutCliente;
 }
