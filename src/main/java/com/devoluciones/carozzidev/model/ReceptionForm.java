@@ -1,5 +1,6 @@
 package com.devoluciones.carozzidev.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -58,4 +59,23 @@ public class ReceptionForm {
 
     @Column(name = PARTIAL_REFUND_COLUMN)
     private boolean partialRefund;
+
+
+    @PrePersist
+    public void prePersist() {
+        // Generar la hora actual al realizar una inserción
+        this.receptionTime = LocalDateTime.now();
+
+        // Generar la fecha actual al realizar una inserción
+        this.receptionDate = LocalDate.now();
+
+        // Generar la fecha actual al realizar una inserción
+        this.invoiceDate = LocalDate.now();
+    }
+
+    @ManyToOne
+    @JoinColumn(name = Client.ID_COLUMN)  // Asegúrate de usar la columna correcta
+    @JsonIgnore
+    private Client client;
+
 }

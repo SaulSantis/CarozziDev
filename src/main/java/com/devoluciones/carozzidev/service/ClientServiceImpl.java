@@ -1,48 +1,48 @@
 package com.devoluciones.carozzidev.service;
 
 import com.devoluciones.carozzidev.model.Client;
-import com.devoluciones.carozzidev.repository.ClientRepository;
+import com.devoluciones.carozzidev.repository.IClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class ClientService implements IClientService {
+public class ClientServiceImpl implements IClientService {
 
-    private final ClientRepository clientRepository;
+    private final IClientRepository IClientRepository;
     @Autowired
-    public ClientService(ClientRepository clientRepository) {
-        this.clientRepository = clientRepository;
+    public ClientServiceImpl(IClientRepository IClientRepository) {
+        this.IClientRepository = IClientRepository;
     }
 
     @Override
     public List<Client> clientList() {
-        return clientRepository.findAll();
+        return IClientRepository.findAll();
     }
 
     @Override
     public List<Client> findClientByName(String clientName) {
-        return clientRepository.findByClientNameContainingIgnoreCase(clientName);
+        return IClientRepository.findByClientNameContainingIgnoreCase(clientName);
     }
 
     @Override
     public List<Client> findClientByRut(String clientRut) {
-        return clientRepository.findByClientRutContainingIgnoreCase(clientRut);
+        return IClientRepository.findByClientRutContainingIgnoreCase(clientRut);
     }
 
     @Override
     public Client saveClient(Client client) {
-        return clientRepository.save(client);
+        return IClientRepository.save(client);
     }
 
     @Override
     public List<Client> saveClientList(List<Client> clients) {
-        return clientRepository.saveAll(clients);
+        return IClientRepository.saveAll(clients);
     }
 
     @Override
     public void deleteClient(Long clientId) {
-        clientRepository.deleteById(clientId);
+        IClientRepository.deleteById(clientId);
     }
 }

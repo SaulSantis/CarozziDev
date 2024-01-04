@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Clase que representa a un cliente en el sistema.
  * Esta clase mapea la entidad Cliente en la base de datos y proporciona la estructura de datos necesaria para
@@ -15,7 +18,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class Client {
 
     /**
@@ -46,4 +48,7 @@ public class Client {
     @Column(name = RUT_COLUMN)
     @NotBlank(message = "El rut del cliente no puede estar en blanco")
     private String clientRut;
+
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
+    private List<ReceptionForm> receptionForms = new ArrayList<>();
 }

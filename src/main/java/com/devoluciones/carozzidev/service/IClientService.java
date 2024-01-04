@@ -1,11 +1,10 @@
 package com.devoluciones.carozzidev.service;
 
 import com.devoluciones.carozzidev.model.Client;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
+
 public interface IClientService {
 
     List<Client> clientList();
