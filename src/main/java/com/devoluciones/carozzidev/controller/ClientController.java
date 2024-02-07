@@ -1,81 +1,92 @@
 package com.devoluciones.carozzidev.controller;
 
-import com.devoluciones.carozzidev.model.Client;
-import com.devoluciones.carozzidev.repository.IClientRepository;
-import com.devoluciones.carozzidev.service.ClientServiceImpl;
+import com.devoluciones.carozzidev.model.entity.Client;
+import com.devoluciones.carozzidev.model.repository.IClientRepository;
+import com.devoluciones.carozzidev.service.IClientService;
+import com.devoluciones.carozzidev.service.impl.ClientImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
-@RestController
-@RequestMapping("/api/client")
+@Controller
+@RequestMapping("/api/v1")
 public class ClientController {
 
     @Autowired
-    private ClientServiceImpl clientServiceImpl;
+    private ClientImpl clientImpl;
+
+    @Autowired
+    private IClientService IClientService;
+
     @Autowired
     private IClientRepository IClientRepository;
 
-
     // Obtener todos los clientes
-    @GetMapping("/all")
-    public ResponseEntity<List<Client>> getAllClients() {
-        List<Client> clients = clientServiceImpl.clientList();
-        return new ResponseEntity<>(clients, HttpStatus.OK);
-    }
-
-    // Guardar un nuevo cliente
-    @PostMapping("/save")
-    public Client saveClient(@RequestBody Client client) {
-        return clientServiceImpl.saveClient(client);
+    @GetMapping("/clients")
+    public String showClientes(Model model) {
+        model.addAttribute("clients", IClientService.clientList());
+        return "plantillaCliente";  // "clientes" se refiere al nombre del archivo HTML en src/main/resources/templates
     }
 
     // Guardar una lista de clientes
-    @PostMapping("/save-list")
-    public List<Client> saveClientList(@RequestBody List<Client> clients) {
-        return clientServiceImpl.saveClientList(clients);
+    @PostMapping("/clients")
+    public ResponseEntity<List<Client>> saveClientList(@RequestBody List<Client> clients) {
+        List<Client> savedClients = clientImpl.saveAll(clients);
+        return new ResponseEntity<>(savedClients, HttpStatus.CREATED);
     }
 
-    // Obtener clientes por nombre
-    @GetMapping("/by-name")
-    public List<Client> getClientesPorNombre(@RequestParam String clientName) {
-        return IClientRepository.findByClientNameContainingIgnoreCase(clientName);
+    // Guardar un nuevo cliente
+    @PostMapping("/client")
+    public String saveClients(@RequestBody Client client, Model model) {
+        Client savedClient = IClientService.save(client);
+        model.addAttribute("client", savedClient);
+        return "plantillaCliente";
     }
 
-    // Obtener clientes por RUT (Rol Único Tributario)
-    @GetMapping("/by-rut")
-    public List<Client> getClientesPorRut(@RequestParam String clientRut) {
-        return IClientRepository.findByClientRutContainingIgnoreCase(clientRut);
+    // Obtener clientes por nombre o por rut
+    @GetMapping("/clients/searchByNameOrRut")
+    public String searchClientsByNameOrRut(@RequestParam String query, Model model) {
+        List<Client> searchResults = IClientRepository.findByClientNameContainingIgnoreCaseOrClientRutContainingIgnoreCase(query, query);
+        model.addAttribute("clients", searchResults);
+        return "plantillaCliente";
     }
 
     // Actualizar un cliente existente
-    @PatchMapping("/update/{clientId}")
-    public ResponseEntity<Client> updateClient(@PathVariable Long clientId, @RequestBody Client updatedClient) {
-        // Verifica si el cliente existe
-        if (!IClientRepository.existsById(clientId)) {
+    @PostMapping("/client/{clientId}")
+    public ResponseEntity<Client> updateClient(@RequestParam Long clientId, @ModelAttribute Client updatedClient) {
+        // Verificar que el cliente con el ID exista antes de actualizar
+        Optional<Client> optionalClient = Optional.ofNullable(clientImpl.findById(clientId));
+
+        if (optionalClient.isPresent()) {
+            // Obtener el cliente existente de la base de datos
+            Client existingClient = optionalClient.get();
+
+            // Actualizar los campos necesarios
+            existingClient.setClientName(updatedClient.getClientName());
+            existingClient.setClientRut(updatedClient.getClientRut());
+
+            // Guardar el cliente actualizado en la base de datos
+            Client savedClient = clientImpl.save(existingClient);
+
+            return new ResponseEntity<>(savedClient, HttpStatus.OK);
+        } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        // Actualiza el cliente
-        updatedClient.setClientId(clientId);
-        Client clienteActualizado = clientServiceImpl.saveClient(updatedClient);
-
-        return new ResponseEntity<>(clienteActualizado, HttpStatus.OK);
     }
 
     // Eliminar un cliente
-    @DeleteMapping("/delete/{clientId}")
-    public ResponseEntity<Void> deleteClient(@PathVariable Long clientId) {
-        // Verifica si el cliente existe
-        if (!IClientRepository.existsById(clientId)) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        // Elimina el cliente
-        clientServiceImpl.deleteClient(clientId);
-
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    @DeleteMapping("/client/{clientId}")
+    public String deleteClient(@PathVariable Long clientId, Model model) {
+        Client deleteClient = IClientService.delete(clientId);
+        model.addAttribute("client", deleteClient);
+        return "plantillaCliente";
     }
-
 }
+
+

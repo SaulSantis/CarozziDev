@@ -1,10 +1,10 @@
-package com.devoluciones.carozzidev.model;
+package com.devoluciones.carozzidev.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,6 +18,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Client {
 
     /**
@@ -49,6 +50,11 @@ public class Client {
     @NotBlank(message = "El rut del cliente no puede estar en blanco")
     private String clientRut;
 
-    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
-    private List<ReceptionForm> receptionForms = new ArrayList<>();
+    // Relación con la entidad ReceptionForm
+    @OneToMany(targetEntity = ReceptionForm.class,
+            fetch = FetchType.LAZY, mappedBy = "client")
+    @JsonIgnore
+    private List<ReceptionForm> receptionForms;
+
+
 }
